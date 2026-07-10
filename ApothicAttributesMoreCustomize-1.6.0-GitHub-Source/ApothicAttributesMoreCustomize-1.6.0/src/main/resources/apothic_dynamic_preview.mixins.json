@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.apothicdynamicpreview.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "apothic_dynamic_preview.refmap.json",
+  "client": [
+    "client.AttributesGuiMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

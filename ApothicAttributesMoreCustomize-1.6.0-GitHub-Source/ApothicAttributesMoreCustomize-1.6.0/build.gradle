@@ -1,0 +1,64 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.141'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = "${archives_base_name}-${minecraft_version}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = neoforge_version
+
+    mods {
+        apothic_dynamic_preview {
+            sourceSet sourceSets.main
+        }
+    }
+
+    runs {
+        client {
+            client()
+        }
+    }
+}
+
+repositories {
+    maven {
+        name = 'Shadows of Fire'
+        url = 'https://maven.shadowsoffire.dev/releases'
+        content {
+            includeGroup 'dev.shadowsoffire'
+        }
+    }
+}
+
+dependencies {
+    implementation "dev.shadowsoffire:Placebo:${minecraft_version}-${placebo_version}"
+    implementation "dev.shadowsoffire:ApothicAttributes:${minecraft_version}-${apothic_attributes_version}"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    def properties = [
+        mod_id: mod_id,
+        mod_name: mod_name,
+        mod_version: mod_version,
+        mod_authors: mod_authors,
+        mod_description: mod_description,
+        minecraft_version: minecraft_version,
+        neoforge_version: neoforge_version
+    ]
+    inputs.properties properties
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand properties
+    }
+}

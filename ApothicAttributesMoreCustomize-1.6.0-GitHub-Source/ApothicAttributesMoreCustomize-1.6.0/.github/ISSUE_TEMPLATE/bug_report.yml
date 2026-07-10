@@ -1,0 +1,47 @@
+name: Bug report
+description: Report an incorrect formula, display/color problem, config-screen issue, crash, or compatibility problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Mod version
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Minecraft, NeoForge, Apothic Attributes, Placebo, and related mod versions.
+    validations:
+      required: true
+  - type: dropdown
+    id: entry_type
+    attributes:
+      label: Affected entry type
+      options:
+        - Standalone non-dynamic attribute
+        - Standalone dynamic attribute
+        - Merged attribute group
+        - NeoForge Mods/Config screen
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: group
+    attributes:
+      label: Relevant merge group and config
+      description: Include the complete highlighting and formula-display sections when relevant.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected formula
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result, screenshot, and logs
+    validations:
+      required: true

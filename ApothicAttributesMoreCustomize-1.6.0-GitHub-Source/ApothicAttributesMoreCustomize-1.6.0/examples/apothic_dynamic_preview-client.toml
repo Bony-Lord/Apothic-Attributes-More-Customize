@@ -1,0 +1,70 @@
+# Copy selected values into config/apothic_dynamic_preview-client.toml.
+# The same values can be changed in game through:
+# Mods -> Apothic Attributes: More Customize -> Config
+
+[attribute_display_merging]
+enabled = true
+groups = [
+  "puffish_attributes:sprinting_speed|artifacts:generic.sprinting_speed"
+]
+mergeOrder = "NORMAL_BEFORE_DYNAMIC"
+includeChangedBaseValues = true
+notifyMissingAttributes = true
+suggestClosestAttribute = true
+logResolvedGroups = true
+
+[formula_display]
+showFormulaText = true
+showStandaloneDynamicFormulaText = true
+showDynamicGroupFormulaText = true
+percentDecimals = 0
+constantDecimals = 2
+identityEpsilon = 1.0E-9
+showIdentityAsDash = true
+
+[formula_display.scientific_notation]
+scientificNotationEnabled = true
+scientificStandaloneDynamicFormulas = true
+scientificDynamicGroupFormulas = true
+scientificPercentages = true
+scientificConstants = true
+scientificLargeNumbers = true
+scientificIntegerDigitsThreshold = 7
+scientificSmallNumbers = true
+scientificLeadingFractionZerosThreshold = 4
+scientificMantissaDecimals = 3
+scientificTrimTrailingZeros = true
+scientificNotationStyle = "E_UPPER"
+scientificAlwaysShowExponentSign = true
+scientificMinimumExponentDigits = 1
+
+[highlighting]
+enabled = true
+highlightNonDynamicAttributes = true
+highlightDynamicAttributes = true
+highlightMergedGroups = true
+
+applyExceptionsToNonDynamicAttributes = true
+applyExceptionsToDynamicAttributes = true
+applyExceptionsToMergedGroups = true
+
+applyInversionToNonDynamicAttributes = true
+applyInversionToDynamicAttributes = true
+applyInversionToMergedGroups = true
+
+applyBaseValuesToNonDynamicAttributes = true
+applyBaseValuesToDynamicAttributes = true
+applyBaseValuesToMergedGroups = true
+
+layout = "SEPARATE"
+commonHighlightMode = "STANDARD"
+exceptions = []
+invertedRuleAttributes = []
+attributeBaseValues = [
+  # "minecraft:generic.movement_speed=0.1",
+  # "puffish_attributes:sprinting_speed=1.0"
+]
+evaluationBaseFallback = "REGISTERED_DEFAULT"
+positiveColor = "GREEN"
+negativeColor = "RED"
+neutralColor = "WHITE"
