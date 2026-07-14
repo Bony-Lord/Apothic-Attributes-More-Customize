@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.1
+
+- Fixed dynamic percentage previews for every attribute in the Apothic dynamic-base tag, instead of special-casing individual attribute IDs.
+- Dynamic `ADD_MULTIPLIED_TOTAL` modifiers now compose additively in the client preview, so `+100%`, `-100%`, `+100%` returns to `+100%` instead of remaining at zero.
+- Dynamic formula percentages now display the modifier delta: a `+100%` modifier is shown as `100%`, not `200%`.
+- Corrected the aggregated modifier value in the Apothic Attributes hover tooltip while preserving its full multiplier for formula evaluation.
+- Kept vanilla multiplicative composition unchanged for ordinary non-dynamic attributes.
+
 ## 1.6.0
 
 - Renamed the public project and display name to **Apothic Attributes: More Customize**.

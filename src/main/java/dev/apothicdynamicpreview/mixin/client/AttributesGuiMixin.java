@@ -6,6 +6,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.DoubleBinaryOperator;
+import java.util.stream.DoubleStream;
 import java.util.stream.Collectors;
 
 import org.spongepowered.asm.mixin.Final;
@@ -66,6 +68,9 @@ public abstract class AttributesGuiMixin {
 
     @Unique
     private AttributeInstance apothicDynamicPreview$currentAttribute;
+
+    @Unique
+    private boolean apothicDynamicPreview$additiveDynamicTooltip;
 
     @Unique
     private final Map<String, AttributeInstance> apothicDynamicPreview$mergedCache = new HashMap<>();
@@ -439,6 +444,69 @@ public abstract class AttributesGuiMixin {
             : this.apothicDynamicPreview$buildDisplayValue(instance, Component.literal("—"));
     }
 
+    @Inject(method = "renderTooltip", at = @At("HEAD"))
+    private void apothicDynamicPreview$captureTooltipAttribute(
+        GuiGraphics graphics,
+        int mouseX,
+        int mouseY,
+        CallbackInfo callback
+    ) {
+        AttributeInstance hovered = ((AttributesGui) (Object) this).getHoveredSlot(mouseX, mouseY);
+        this.apothicDynamicPreview$additiveDynamicTooltip = hovered != null
+            && hovered.getAttribute().is(ALObjects.Tags.DYNAMIC_BASE_ATTRIBUTES);
+    }
+
+    @Redirect(
+        method = "renderTooltip",
+        at = @At(
+            value = "INVOKE",
+            target = "Ljava/util/stream/DoubleStream;reduce(DLjava/util/function/DoubleBinaryOperator;)D"
+        ),
+        require = 1
+    )
+    private double apothicDynamicPreview$combineTooltipModifiers(
+        DoubleStream values,
+        double identity,
+        DoubleBinaryOperator operator
+    ) {
+        if (this.apothicDynamicPreview$additiveDynamicTooltip && identity == 1.0D) {
+            return 1.0D + values.sum();
+        }
+        return values.reduce(identity, operator);
+    }
+
+    @Redirect(
+        method = "renderTooltip",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/ai/attributes/Attribute;toValueComponent(Lnet/minecraft/world/entity/ai/attributes/AttributeModifier$Operation;DLnet/minecraft/world/item/TooltipFlag;)Lnet/minecraft/network/chat/MutableComponent;",
+            ordinal = 4
+        ),
+        require = 1
+    )
+    private MutableComponent apothicDynamicPreview$displayTooltipModifierDelta(
+        Attribute attribute,
+        Operation operation,
+        double value,
+        TooltipFlag flag
+    ) {
+        double displayValue = this.apothicDynamicPreview$additiveDynamicTooltip
+            && operation == Operation.ADD_MULTIPLIED_TOTAL
+                ? value - 1.0D
+                : value;
+        return attribute.toValueComponent(operation, displayValue, flag);
+    }
+
+    @Inject(method = "renderTooltip", at = @At("RETURN"))
+    private void apothicDynamicPreview$releaseTooltipAttribute(
+        GuiGraphics graphics,
+        int mouseX,
+        int mouseY,
+        CallbackInfo callback
+    ) {
+        this.apothicDynamicPreview$additiveDynamicTooltip = false;
+    }
+
     @Inject(method = "renderEntry", at = @At("RETURN"))
     private void apothicDynamicPreview$releaseAttribute(
         GuiGraphics graphics,
@@ -506,7 +574,8 @@ public abstract class AttributesGuiMixin {
         int percentDecimals = ClientConfig.PERCENT_DECIMALS.get();
         int constantDecimals = ClientConfig.CONSTANT_DECIMALS.get();
         double epsilon = ClientConfig.IDENTITY_EPSILON.get();
-        double rawPercent = formula.multiplier() * 100.0D;
+        boolean dynamic = this.apothicDynamicPreview$isDynamicEntry(instance);
+        double rawPercent = (dynamic ? formula.multiplier() - 1.0D : formula.multiplier()) * 100.0D;
         double rawConstant = formula.constant();
         ScientificNumberFormatter.Options scientificOptions = ClientConfig.scientificNumberOptions();
         boolean scientificForTarget = this.apothicDynamicPreview$isMergedEntry(instance)
@@ -530,8 +599,9 @@ public abstract class AttributesGuiMixin {
         double roundedConstant = scientificConstant
             ? rawConstant
             : ScientificNumberFormatter.roundPlain(rawConstant, constantDecimals);
+        double identityPercent = dynamic ? 0.0D : 100.0D;
         boolean showMultiplier = Math.abs(formula.multiplier() - 1.0D) > epsilon
-            && (scientificPercent || roundedPercent != 100.0D);
+            && (scientificPercent || roundedPercent != identityPercent);
         boolean showConstant = Math.abs(rawConstant) > epsilon
             && (scientificConstant || roundedConstant != 0.0D);
 

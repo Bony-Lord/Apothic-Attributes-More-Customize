@@ -1,5 +1,6 @@
 package dev.apothicdynamicpreview;
 
+import dev.shadowsoffire.apothic_attributes.api.ALObjects;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
@@ -33,10 +34,16 @@ public record AttributeFormula(double multiplier, double constant) {
             .mapToDouble(AttributeModifier::amount)
             .sum();
 
-        double multipliedTotal = instance.getModifiers().stream()
-            .filter(modifier -> modifier.operation() == Operation.ADD_MULTIPLIED_TOTAL)
-            .mapToDouble(modifier -> 1.0D + modifier.amount())
-            .reduce(1.0D, (left, right) -> left * right);
+        boolean dynamic = instance.getAttribute().is(ALObjects.Tags.DYNAMIC_BASE_ATTRIBUTES);
+        double multipliedTotal = dynamic
+            ? 1.0D + instance.getModifiers().stream()
+                .filter(modifier -> modifier.operation() == Operation.ADD_MULTIPLIED_TOTAL)
+                .mapToDouble(AttributeModifier::amount)
+                .sum()
+            : instance.getModifiers().stream()
+                .filter(modifier -> modifier.operation() == Operation.ADD_MULTIPLIED_TOTAL)
+                .mapToDouble(modifier -> 1.0D + modifier.amount())
+                .reduce(1.0D, (left, right) -> left * right);
 
         double baseDifference = includeBaseDifference
             ? instance.getBaseValue() - instance.getAttribute().value().getDefaultValue()
